@@ -9,6 +9,8 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using MemberService.Models;
+using MemberService.DAL;
+using System.Collections.Generic;
 
 namespace MemberService.Controllers
 {
@@ -79,6 +81,17 @@ namespace MemberService.Controllers
             switch (result)
             {
                 case SignInStatus.Success:
+                    UserRolesTable rt = new UserRolesTable(new DbManager(""));
+                    UserTable<ApplicationUser> ut = new UserTable<ApplicationUser>(new DbManager(""));
+                    int memberId = ut.GetmemberId(model.Email);
+                    List<string> roleOfUser = rt.FindByUserId(memberId);
+                    if(roleOfUser.Contains("Admin"))
+                    {
+                        return RedirectToAction("Index", "Services");
+                    }else if (roleOfUser.Contains("Member"))
+                    {
+                        return RedirectToAction("Index", "Subscriptions");
+                    }
                     return RedirectToLocal(returnUrl);
                 case SignInStatus.LockedOut:
                     return View("Lockout");
@@ -139,6 +152,11 @@ namespace MemberService.Controllers
         [AllowAnonymous]
         public ActionResult Register()
         {
+            //var rs = new RoleStore<IdentityRole>();
+            //var roles = rs.Roles.AsEnumerable();
+            RoleTable rt = new RoleTable(new DbManager(""));
+            var roles = rt.GetAllRoles();
+            ViewBag.Roles = new SelectList(roles, "Id", "Name");
             return View();
         }
 
@@ -153,17 +171,29 @@ namespace MemberService.Controllers
             {
                 var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
                 var result = await UserManager.CreateAsync(user, model.Password);
+                //var roleAssign = UserManager.AddToRole(user.Id, model.RoleName);
                 if (result.Succeeded)
                 {
+                    UserRolesTable rt = new UserRolesTable(new DbManager(""));
+                    rt.Insert(user, model.RoleId);
+
                     await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
-                    
+
                     // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
                     // Send an email with this link
                     // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
                     // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
                     // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
 
-                    return RedirectToAction("Index", "Home");
+                    //return RedirectToAction("Index", "Home");                    
+                    if (model.RoleId==1)
+                    {
+                        return RedirectToAction("Index", "Services");
+                    }
+                    else if (model.RoleId== 2)
+                    {
+                        return RedirectToAction("Index", "Subscriptions");
+                    }
                 }
                 AddErrors(result);
             }
@@ -175,13 +205,13 @@ namespace MemberService.Controllers
         //
         // GET: /Account/ConfirmEmail
         [AllowAnonymous]
-        public async Task<ActionResult> ConfirmEmail(string userId, string code)
+        public async Task<ActionResult> ConfirmEmail(int? userId, string code)
         {
-            if (userId == null || code == null)
+            if (!userId.HasValue || code == null)
             {
                 return View("Error");
             }
-            var result = await UserManager.ConfirmEmailAsync(userId, code);
+            var result = await UserManager.ConfirmEmailAsync(userId.Value, code);
             return View(result.Succeeded ? "ConfirmEmail" : "Error");
         }
 
@@ -392,7 +422,7 @@ namespace MemberService.Controllers
         public ActionResult LogOff()
         {
             AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Login");
         }
 
         //

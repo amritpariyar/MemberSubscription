@@ -1,0 +1,38 @@
+﻿@model MemberService.Data.BLL.MemberServices
+@{
+    ViewBag.Title = "MakePayment";
+}
+
+<div class="container">
+    <div class="panel panel-default">
+        <div class="panel-heading">Make Payment </div>
+        <div class="panel-body">
+            <fieldset>
+                <legend>Payment: @Model.ServiceName</legend>
+                <dl>
+                    <dt>Member:</dt>
+                    <dd>@Model.MemberName</dd>
+                    <dt>Service:</dt>
+                    <dd>@Model.ServiceName</dd>
+                    <dt>Amount:</dt>
+                    <dd>@Model.ServiceRate</dd>
+                    <dt>Service Type:</dt>
+                    <dd>@Model.ServiceType</dd>
+                </dl>
+                @using (Html.BeginForm("MakePayment","Subscriptions",FormMethod.Post,new { @Id="PaymentForm"}))
+                {
+                    @Html.HiddenFor(model=>model.Id)
+                    @Html.HiddenFor(model=>model.MemberId)
+                    @Html.HiddenFor(model=>model.ServiceId)
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-sm btn-primary"><i class="glyphicon glyphicon-send"></i> Make Payment</button>
+                    <a href="@Url.Action("Index","Subscriptions")" class="btn btn-sm btn-default">
+                        <i class="glyphicon glyphicon-chevron-left"></i> Cancel
+                    </a>
+                }
+                
+            </fieldset>
+        </div>
+    </div>
+</div>
+

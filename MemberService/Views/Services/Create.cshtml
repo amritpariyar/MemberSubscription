@@ -1,0 +1,64 @@
+﻿@model MemberService.Data.BLL.Service
+@{
+    ViewBag.Title = "Create";
+}
+<div class="container">
+    <div class="panel panel-default">
+        <div class="panel-heading">Create Service</div>
+        <div class="panel-body">
+            @using (Html.BeginForm("Create", "Services", FormMethod.Post, new { @class = "form-horizontal" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.ValidationMessage("Exception")
+                @Html.HiddenFor(model=>model.Id)
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Name, new { @class = "col-sm-2 control-label" })
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(model => model.Name, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Name)
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Rate, new { @class = "col-sm-2 control-label" })
+                    <div class="col-sm-10">
+                        <div class="input-group">
+                            <span class="input-group-addon">$</span>
+                            @Html.TextBoxFor(model => model.Rate, new { @class = "form-control" })
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.ServiceType, new { @class = "col-sm-2 control-label" })
+                    <div class="col-sm-10">
+                        <div>
+                            <input type="radio" id="OneTime" name="ServiceType" value="OneTime" @(Model!=null && Model.ServiceType=="OneTime"?"Checked":"") />
+                            <label for="OneTime">One Time</label>
+                            <input type="radio" id="Monthly" name="ServiceType" value="Monthly" @(Model!=null && Model.ServiceType=="Monthly"?"Checked":"") />
+                            <label for="Monthly">Monthly</label>
+                        </div>
+                        @Html.ValidationMessageFor(model => model.ServiceType)
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.AppliedDate, new { @class = "col-sm-2 control-label" })
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(model => model.AppliedDate, new { @class="form-control"})
+                        @Html.ValidationMessageFor(model => model.AppliedDate)
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <a href="@Url.Action("Index")" id="Cancel" class="btn btn-sm btn-default"><i class="glyphicon glyphicon-chevron-left"></i> Cancel</a>
+                        <button type="submit" id="Save" class="btn btn-sm btn-primary"><i class="glyphicon glyphicon-save"></i> Save</button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+
+    </script>
+}

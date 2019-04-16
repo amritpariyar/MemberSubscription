@@ -1,0 +1,50 @@
+﻿@model IEnumerable<MemberService.Data.BLL.Service>
+@{
+    ViewBag.Title = "Index";
+}
+
+<div class="container">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <a href="@Url.Action("Create")" class="btn btn-primary btn-sm pull-right"><i class="glyphicon glyphicon-plus"></i> Add New</a>
+            <span class="panel-title">Service List</span>
+        </div>
+        <div class="panel-body">
+            <table id="serviceTable" class="table table-hover table-condensed table-striped">
+                <thead>
+                    <tr>
+                        <th>S.N</th>
+                        <th>Name</th>
+                        <th>Rate</th>
+                        <th>Type</th>
+                        <th>Applied Date</th>
+                        <th>Stauts</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Count() > 0)
+                    {
+                        int count = 0;
+                        foreach (var item in Model)
+                        {
+                            count++;
+                            <tr>
+                                <td>@count</td>
+                                <td>@item.Name</td>
+                                <td>$ @item.Rate</td>
+                                <td>@item.ServiceType</td>
+                                <td>@item.AppliedDate.ToString("yyyy-MM-dd")</td>
+                                <td><a href="@Url.Action("ChangeStatus","Services",new { @Id=item.Id})">@(item.Status=='A'?"Diactivate":"Activate")</a> </td>
+                                <td>
+                                    <a href="@Url.Action("Edit","Services",new { @Id=item.Id})">Edit</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,94 @@
+﻿@model IEnumerable<MemberService.Data.BLL.MemberServices>
+@{
+    ViewBag.Title = "Index";
+}
+<style>
+    .active {
+        background-color: cornflowerblue !important;
+    }
+
+    .cancelled {
+        background-color: lightsalmon !important;
+    }
+</style>
+<div class="container">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <a href="@Url.Action("Create")" class="btn btn-primary btn-sm pull-right"><i class="glyphicon glyphicon-plus"></i> Add Service</a>
+            <span class="panel-title">My Substriptions List</span>
+        </div>
+        <div class="panel-body">
+            @if (Model != null && Model.Count() > 0)
+            {
+                int count = 0;
+                <table id="serviceTable" class="table table-hover table-condensed">
+                    <thead>
+                        <tr>
+                            <th>S.N</th>
+                            <th>Service</th>
+                            <th>Start Date</th>
+                            <th>Valid Date</th>
+                            <th>Status</th>
+                            <th>Is Paid?</th>
+                            <th>Payment Verified?</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            count++;
+
+                            <tr class="@item.Status.ToLower()">
+                                <td>@count</td>
+                                <td>@item.ServiceName</td>
+                                <td>@item.StartDate.ToString("yyyy-MM-dd")</td>
+                                <td>@(item.ServiceType == "Monthly" ? item.ValidDate.ToString("yyyy-MM-dd") : "--")</td>
+                                <td>@item.Status</td>
+                                <td>@item.IsPaid</td>
+                                <td>@item.PaymentConfirmed</td>
+                                <td>
+                                    @if (!item.IsPaid && !string.Equals(item.Status, "Cancelled"))
+                                    {
+                                        <a href="@Url.Action("MakePayment", "Subscriptions", new { @myserviceid = item.Id })"
+                                           class="btn btn-xs btn-primary">
+                                            <i class="glyphicon glyphicon-usd"></i> Make Payment
+                                        </a>
+
+                                        <a href="@Url.Action("CancelService", "Subscriptions", new { @myserviceid = item.Id })"
+                                           class="btn btn-xs btn-default">
+                                            <i class="glyphicon glyphicon-trash"></i> Cancel
+                                        </a>
+                                    }
+                                    else if (item.IsPaid && !string.Equals(item.Status, "Cancelled"))
+                                    {
+                                        <a href="@Url.Action("PrintInvoice", "Subscriptions", new { @myserviceid = item.Id })"
+                                           class="btn btn-xs btn-primary">
+                                            <i class="glyphicon glyphicon-print"></i> Print Invoice
+                                        </a>
+                                        if (item.ServiceType == "Monthly")
+                                        {
+                                            <a href="@Url.Action("CancelService", "Subscriptions", new { @myserviceid = item.Id })"
+                                               class="btn btn-xs btn-default">
+                                                <i class="glyphicon glyphicon-trash"></i> Cancel
+                                            </a>
+                                        }
+                                    }
+
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            }
+            else
+            {
+                <div class="alert alert-warning" role="alert">
+                    <strong>Info !</strong>No Service Subscriptin found, Go <a href="@Url.Action("Create")" class="alert-link">here</a> for new service.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+

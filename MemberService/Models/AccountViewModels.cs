@@ -65,6 +65,9 @@ namespace MemberService.Models
     public class RegisterViewModel
     {
         [Required]
+        public int RoleId { get; set; }
+
+        [Required]
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; }
