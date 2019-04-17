@@ -127,7 +127,7 @@ GO
 INSERT INTO ROLE(Name) VALUES('MEMBER')
 GO
 
-CREATE TABLE Services(
+CREATE TABLE Services( -- service table
 	Id INT IDENTITY (1, 1) PRIMARY KEY,
 	Name NVARCHAR(255), --$5.00/$60.00
 	Rate FLOAT, -- 5/60
@@ -150,7 +150,7 @@ GO
 
 DROP TABLE MyServices;
 GO
-CREATE TABLE MyServices(
+CREATE TABLE MyServices( --MyServices Table 
 	Id INT IDENTITY (1, 1) PRIMARY KEY,
 	MemberId INT FOREIGN KEY REFERENCES Member(Id),
 	ServiceId INT FOREIGN KEY REFERENCES Services(Id),
