@@ -31,6 +31,11 @@ namespace MemberService.Data.BLL
 
         public float Amount { get; set; }
 
+        public string StripeEmail { get; set; }
+        public string StripeToken { get; set; }
+        public string StripeCustomerId { get; set; }
+        public string StripeSubscriptionId { get; set; }
+
         //public virtual ICollection<Service> Service { get; set; }
         public virtual Service Service { get; set; }
     }

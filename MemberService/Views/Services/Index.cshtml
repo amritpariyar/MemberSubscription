@@ -18,6 +18,7 @@
                         <th>Rate</th>
                         <th>Type</th>
                         <th>Applied Date</th>
+                        <th>Plan Name</th>
                         <th>Stauts</th>
                         <th>Action</th>
                     </tr>
@@ -35,6 +36,18 @@
                                 <td>$ @item.Rate</td>
                                 <td>@item.ServiceType</td>
                                 <td>@item.AppliedDate.ToString("yyyy-MM-dd")</td>
+                                <td>
+                                    @if (string.Equals(item.Name,"Monthly") && string.IsNullOrEmpty(item.StripePlanName))
+                                    {
+                                        <a href="@Url.Action("CreatePlan","Services",new { @Id=item.Id})">Create Plan</a> 
+                                    }
+                                    else
+                                    {
+                                        <span>@item.StripePlanName</span>
+                                    }
+                                    
+                                </td>
+
                                 <td><a href="@Url.Action("ChangeStatus","Services",new { @Id=item.Id})">@(item.Status=='A'?"Diactivate":"Activate")</a> </td>
                                 <td>
                                     <a href="@Url.Action("Edit","Services",new { @Id=item.Id})">Edit</a>

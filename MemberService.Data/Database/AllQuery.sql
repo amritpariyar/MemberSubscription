@@ -133,7 +133,7 @@ CREATE TABLE Services( -- service table
 	Rate FLOAT, -- 5/60
 	Status CHAR(1), -- A, I
 	ServiceType NVARCHAR(20), -- OneTime/ Monthly
-	AppliedDate datetime
+	AppliedDate datetime	
 )
 GO
 
@@ -162,4 +162,11 @@ CREATE TABLE MyServices( --MyServices Table
 	Amount FLOAT NULL, -- amount cann be retrieved from respected serviceId,
 	PaymentConfirmed BIT
 )
+GO
+
+-- Update Query
+ALTER TABLE myservices ADD StripeEmail NVARCHAR(255),StripeToken NVARCHAR(255), StripeCustomerId NVARCHAR(255),StripeSubscriptionId nvarchar(255);
+GO
+
+ALTER TABLE Services ADD StripePlanName NVARCHAR(255);
 GO

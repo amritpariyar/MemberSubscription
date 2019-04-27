@@ -18,7 +18,7 @@ namespace MemberService.DAL
 
         public List<Service> GetServiceList()
         {
-            return db.Connection.Query<Service>("Select Id, Name, Rate,Status, ServiceType, AppliedDate from Services").ToList();
+            return db.Connection.Query<Service>("Select Id, Name, Rate,Status, ServiceType, AppliedDate, StripePlanName from Services").ToList();
         }
         public List<Service> GetAppliedServiceList(int member)
         {
@@ -49,7 +49,7 @@ namespace MemberService.DAL
 
         public Service GetServiceById(int id)
         {
-            string query = $@"Select Id, Name, Rate,Status, ServiceType, AppliedDate from Services Where Id='{id}'";
+            string query = $@"Select Id, Name, Rate,Status, ServiceType, AppliedDate, StripePlanName from Services Where Id='{id}'";
             return this.db.Connection.Query<Service>(query).FirstOrDefault();
         }
 
@@ -63,6 +63,12 @@ namespace MemberService.DAL
         {
             string query = $@"update Services Set Status=case when Status='A' then 'I' When Status='I' then 'A' end where id={id}";
             this.db.Connection.Execute(query);
-        }       
+        }
+
+        public void CreateStripPlanForService(int id, string planName)
+        {
+            string query = $@"update Services Set StripePlanName=@PlanName where id=@Id";
+            this.db.Connection.Execute(query,new { PlanName=planName, Id=id});
+        }
     }
 }

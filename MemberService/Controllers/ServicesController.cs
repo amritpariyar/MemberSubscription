@@ -1,6 +1,7 @@
 ﻿using MemberService.DAL;
 using MemberService.Data.BLL;
 using MemberService.Models;
+using Stripe;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -106,6 +107,79 @@ namespace MemberService.Controllers
             {
                 throw;
             }
+        }
+
+        public ActionResult Charges()
+        {
+            return View();
+        }
+
+        public JsonResult GetAllCharges()
+        {
+            var service = new ChargeService();
+            var collection = service.List();
+            List<dynamic> resultData = new List<dynamic>();
+            collection.Data.ForEach(a =>
+            {
+                try
+                {
+                    resultData.Add(new
+                    {
+                        Name = a.Metadata.Where(p => p.Key == "MemberName").First().Value,
+                        Service = a.Metadata.Where(p => p.Key == "ServiceName").First().Value,
+                        Amount = a.Amount > 0 ? (a.Amount / 100) : 0,
+                        Email = a.ReceiptEmail,
+                        Token = a.Id,
+                        Paid = a.Paid,
+                        Currency = a.Currency,
+                        Description = a.Description
+                    });
+                }
+                catch (Exception ex) {
+
+                }
+            });
+            return new JsonResult()
+            {
+                Data = new { data = resultData },
+                ContentType = "application/json",
+                MaxJsonLength = Int32.MaxValue,
+                JsonRequestBehavior = JsonRequestBehavior.AllowGet
+            };
+        }
+
+        public ActionResult CreatePlan(int Id)
+        {
+            var service = this._serviceRepo.GetServiceById(Id);
+            var options = new PlanCreateOptions
+            {
+                Product = new PlanProductCreateOptions
+                {
+                    Name = "Monthly"
+                },
+                Amount = (long)(service.Rate*100),
+                Currency = "usd",
+                Interval = "month",
+            };
+
+            var planservice = new PlanService();
+            
+            if (string.IsNullOrEmpty(service.StripePlanName))
+            {
+                Plan plan = planservice.Create(options);
+                this._serviceRepo.CreateStripPlanForService(Id, plan.Id);
+            }
+            else
+            {
+                Plan existingPlan =  planservice.Get(service.StripePlanName);
+                if (existingPlan == null)
+                {
+                    Plan plan = planservice.Create(options);
+                    this._serviceRepo.CreateStripPlanForService(Id, plan.Id);
+                }                
+            }  
+            
+            return RedirectToAction("Index");
         }
     }
 }

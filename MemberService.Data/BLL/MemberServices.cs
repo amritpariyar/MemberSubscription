@@ -25,5 +25,9 @@ namespace MemberService.Data.BLL
         public string ServiceName { get; set; }
         public string ServiceType { get; set; }
         public string ServiceRate { get; set; }
+        public string StripeEmail { get; set; }
+        public string StripeToken { get; set; }
+        public string StripeCustomerId { get; set; }
+        public string StripeSubscriptionId { get; set; }
     }
 }

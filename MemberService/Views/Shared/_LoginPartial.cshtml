@@ -9,6 +9,7 @@
         @if (roleOfUser.Contains("Admin"))
         {
             <li>@Html.ActionLink("Services", "Index", "Services")</li>
+            <li>@Html.ActionLink("Charges", "Charges", "Services")</li>
         }
         @if (roleOfUser.Contains("Member"))
         {

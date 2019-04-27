@@ -1,6 +1,7 @@
 ﻿using MemberService.DAL;
 using MemberService.Data.BLL;
 using MemberService.Models;
+using Stripe;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -77,6 +78,8 @@ namespace MemberService.Controllers
             bool isInstallationActive = this._mySubscriptionRepo.CheckIfInstallationActive(member);
             ViewBag.isInstallationActive = isInstallationActive;
             ViewBag.IsMemberService = serviceList.Where(a => !a.Name.Contains("Installation")).Count() == 1 ? true : false;
+            string membersStripeCustomerId = this._mySubscriptionRepo.FindMembersStripeCustomerId(member);
+            subscription.StripeCustomerId = membersStripeCustomerId;
             return View(subscription);
         }
 
@@ -87,21 +90,45 @@ namespace MemberService.Controllers
             if (model.Id == 0) //
             {
                 Service requestedService = this._serviceRepo.GetServiceById(model.ServiceId);
-                if (requestedService.ServiceType.ToUpper() == "MONTHLY")
-                {
-                    model.ValidDate = model.StartDate.AddMonths(1);
-                }
-                else
-                {
-                    model.ValidDate = model.StartDate.AddYears(50); // no need but value cannot be null so.
-                }
-                model.MemberId = this._userTable.GetmemberId(User.Identity.Name);                
+                model.MemberId = this._userTable.GetmemberId(User.Identity.Name);
                 model.Status = "InActive"; // InActive untill payment not done.
                 model.IsPaid = false;
                 model.PaymentConfirmed = false;
 
-                int memberServiceId = this._mySubscriptionRepo.AddService(model);
-                return RedirectToAction("MakePayment",new { myserviceid=memberServiceId});
+                if (requestedService.ServiceType.ToUpper() == "MONTHLY")
+                {
+                    model.ValidDate = model.StartDate.AddMonths(1);
+                    int memberServiceId = this._mySubscriptionRepo.AddService(model);
+
+                    var items = new List<SubscriptionItemOption> {
+                      new SubscriptionItemOption {
+                        PlanId = requestedService.StripePlanName                        
+                      }
+                    };
+                    
+                    var options = new SubscriptionCreateOptions
+                    {
+                        CustomerId = model.StripeCustomerId,// "cus_ExQd0tzJcBzqlw",
+                        Items = items,
+                        Metadata = new Dictionary<string, string>() {
+                            { "MemberServiceId",memberServiceId.ToString()},
+                            { "PaymentUrl","/Payment/Index?myserviceid="+memberServiceId.ToString()},
+                        }
+                    };
+
+                    var service = new SubscriptionService();
+                    Subscription subscription = service.Create(options);
+                    this._mySubscriptionRepo.UpdateSubscriptionStatus(memberServiceId, model.StripeCustomerId,subscription.Id);
+                    return RedirectToAction("Index", "Subscriptions");
+                }
+                else
+                {
+                    model.ValidDate = model.StartDate.AddYears(50); // no need but value cannot be null so.
+                    int memberServiceId = this._mySubscriptionRepo.AddService(model);
+                    return RedirectToAction("Index", "Payment", new { myserviceid = memberServiceId });
+                }
+                
+                
             }
             else
             {
@@ -112,6 +139,15 @@ namespace MemberService.Controllers
             return View(model);
         }
 
+        public ActionResult CancelSubscription(string subscriptinId)
+        {
+            var service = new SubscriptionService();
+            var subscription = service.Cancel(subscriptinId,null);
+            this._mySubscriptionRepo.CancelSubscription(subscriptinId);
+            return RedirectToAction("Index");
+            
+        }
+
         public ActionResult MakePayment(int myserviceid)
         {
             int userid = this._userTable.GetmemberId(User.Identity.Name);
@@ -119,11 +155,12 @@ namespace MemberService.Controllers
             return View(memberServices);
         }
 
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult MakePayment(MemberServices formColl)
         {
-            bool paid =  this._mySubscriptionRepo.MakePaymentFor(formColl);
+            bool paid = this._mySubscriptionRepo.MakePaymentFor(formColl);
             if (paid)
             {
                 // send subscriptin activated email
@@ -135,8 +172,34 @@ namespace MemberService.Controllers
             {
                 return View(formColl);
             }
-            
+
         }
+
+        //public ActionResult MakePayment(int myserviceid)
+        //{
+        //    int userid = this._userTable.GetmemberId(User.Identity.Name);
+        //    MemberServices memberServices = this._mySubscriptionRepo.GetSubscriptionDetail(myserviceid);
+        //    return View(memberServices);
+        //}
+
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public ActionResult MakePayment(MemberServices formColl)
+        //{
+        //    bool paid =  this._mySubscriptionRepo.MakePaymentFor(formColl);
+        //    if (paid)
+        //    {
+        //        // send subscriptin activated email
+        //        string message = $@"Dear {formColl.MemberName} , The service {formColl.ServiceName} you orderd is active now. Thank you.";
+        //        SendEmail.SendSubscriptionDetail(message);
+        //        return RedirectToAction("Index");
+        //    }
+        //    else
+        //    {
+        //        return View(formColl);
+        //    }
+
+        //}
 
         public ActionResult CancelService(int myserviceid)
         {

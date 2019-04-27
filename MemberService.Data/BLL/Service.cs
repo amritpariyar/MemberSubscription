@@ -19,5 +19,7 @@ namespace MemberService.Data.BLL
         public string ServiceType { get; set; }
         [Required, Display(Name="Applied Date")]
         public DateTime AppliedDate { get; set; }
+
+        public string StripePlanName { get; set; }
     }
 }

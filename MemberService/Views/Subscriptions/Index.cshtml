@@ -48,9 +48,9 @@
                                 <td>@item.IsPaid</td>
                                 <td>@item.PaymentConfirmed</td>
                                 <td>
-                                    @if (!item.IsPaid && !string.Equals(item.Status, "Cancelled"))
+                                    @if (!item.IsPaid && !string.Equals(item.Status, "Cancelled") && !string.Equals(item.Status, "Subscription") && !string.Equals(item.Status, "SubscriptionCanceled"))
                                     {
-                                        <a href="@Url.Action("MakePayment", "Subscriptions", new { @myserviceid = item.Id })"
+                                        <a href="@Url.Action("Index", "Payment", new { @myserviceid = item.Id })"
                                            class="btn btn-xs btn-primary">
                                             <i class="glyphicon glyphicon-usd"></i> Make Payment
                                         </a>
@@ -60,7 +60,18 @@
                                             <i class="glyphicon glyphicon-trash"></i> Cancel
                                         </a>
                                     }
-                                    else if (item.IsPaid && !string.Equals(item.Status, "Cancelled"))
+                                    else if (!item.IsPaid && !string.Equals(item.Status, "Cancelled") && string.Equals(item.Status, "Subscription") && item.ServiceType == "Monthly")
+                                    {
+                                        <a href="javascript:void(0)" 
+                                           class="btn btn-xs btn-primary disabled">
+                                            <i class="glyphicon glyphicon-usd"></i> Make Payment
+                                        </a>
+                                            <a href="@Url.Action("CancelSubscription", "Subscriptions", new { @subscriptinId = item.StripeSubscriptionId})"
+                                               class="btn btn-xs btn-default">
+                                                <i class="glyphicon glyphicon-trash"></i> Cancel
+                                            </a>
+                                    }
+                                    else if (item.IsPaid && !string.Equals(item.Status, "Cancelled") && string.Equals(item.Status, "Subscription"))
                                     {
                                         <a href="@Url.Action("PrintInvoice", "Subscriptions", new { @myserviceid = item.Id })"
                                            class="btn btn-xs btn-primary">
@@ -68,7 +79,7 @@
                                         </a>
                                         if (item.ServiceType == "Monthly")
                                         {
-                                            <a href="@Url.Action("CancelService", "Subscriptions", new { @myserviceid = item.Id })"
+                                            <a href="@Url.Action("CancelSubscription", "Subscriptions", new { @subscriptinId = item.StripeSubscriptionId})"
                                                class="btn btn-xs btn-default">
                                                 <i class="glyphicon glyphicon-trash"></i> Cancel
                                             </a>

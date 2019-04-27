@@ -14,6 +14,7 @@
                 @Html.AntiForgeryToken()
                 @Html.ValidationMessage("Exception")
                 @Html.HiddenFor(model => model.Id)
+                @Html.HiddenFor(model => model.StripeCustomerId)
                 if (IsMemberService && !isInstallationActive)
                 {
                     <div class="alert alert-warning" role="alert">
@@ -48,7 +49,7 @@
                         <a href="@Url.Action("Index")" id="Cancel" class="btn btn-sm btn-default"><i class="glyphicon glyphicon-chevron-left"></i> Cancel</a>
                         @if ((IsMemberService && isInstallationActive) || !IsMemberService)
                         {
-                            <button type="submit" id="Save" class="btn btn-sm btn-primary"><i class="glyphicon glyphicon-save"></i> Save</button>
+                            <button type="submit" id="Save" class="btn btn-sm btn-primary"><i class="glyphicon glyphicon-save"></i>@( IsMemberService?"Send Subscription":"Save")</button>
                         }
 
                     </div>

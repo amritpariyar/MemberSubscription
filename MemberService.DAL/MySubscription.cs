@@ -46,8 +46,16 @@ namespace MemberService.DAL
         {
             try
             {
-                var query = @"update MyServices set IsPaid='true', PaymentConfirmed='true', Status='Active', Amount=@Amount where id=@serviceId";
-                db.Connection.Execute(query, new { Amount = formColl.Amount, serviceId = formColl.Id });
+                var query = @"update MyServices 
+                set IsPaid='true'
+                , PaymentConfirmed='true'
+                , Status='Active'
+                , Amount=@Amount 
+                , StripeEmail=@StripeEmail
+                , StripeToken=@StripeToken
+                , StripeCustomerId=@StripeCustomerId
+                where id=@serviceId";
+                db.Connection.Execute(query, new { Amount = formColl.Amount, serviceId = formColl.Id, formColl.StripeEmail,formColl.StripeToken,formColl.StripeCustomerId });
                 return true;
             }
             catch (Exception)
@@ -69,12 +77,35 @@ namespace MemberService.DAL
             }
         }
 
+        public string FindMembersStripeCustomerId(int member)
+        {
+            return (string)db.Connection.ExecuteScalar("Select StripeCustomerId from myservices where MemberId=@member and StripeCustomerId is not null", new { member });
+        }
+
         public bool CheckIfInstallationActive(int member)
         {
             string query = @"select count(*) from MyServices Where ServiceId in (select id from Services where Name='Installation') and IsPaid='true' and PaymentConfirmed='true' and MemberId=@member";
             int count = db.Connection.Query<int>(query, new { member = member }).SingleOrDefault();
             if (count == 1) return true;
             else return false;
+        }
+
+        public void UpdateSubscriptionStatus(int memberServiceId, string stripeCustomerId, string stripeSubscriptionId)
+        {
+            db.Connection.Execute("Update MyServices Set Status='Subscription', StripeCustomerId=@stripeCustomerId, StripeSubscriptionId=@stripeSubscriptionId Where Id=@memberServiceId", new { stripeCustomerId, stripeSubscriptionId, memberServiceId });
+        }
+
+        public void CancelSubscription(string subscriptinId)
+        {
+            try
+            {
+                var query = @"Update MyServices Set Status='SubscriptionCanceled' Where StripeSubscriptionId=@subscriptinId";
+                db.Connection.Execute(query, new { subscriptinId});
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

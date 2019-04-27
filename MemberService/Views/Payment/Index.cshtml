@@ -1,0 +1,60 @@
+﻿@*@using Microsoft.Extensions.Options
+    @inject IOptions<StripeSettings> Stripe*@
+@model MemberService.Data.BLL.MemberServices
+@{
+    ViewBag.Title = "Payment";
+    string publishableKey = System.Configuration.ConfigurationManager.AppSettings["StripeApiKey"];
+}
+
+<div class="container">
+    <div class="panel panel-default">
+        <div class="panel-heading">Make Payment </div>
+        <div class="panel-body">
+            <fieldset>
+                <legend>Payment: @Model.ServiceName</legend>
+                <dl>
+                    <dt>Member:</dt>
+                    <dd>@Model.MemberName</dd>
+                    <dt>Service:</dt>
+                    @*<dd>@Model.ServiceName</dd>
+                        <dt>Amount:</dt>*@
+                    <dd>@Model.ServiceRate</dd>
+                    <dt>Service Type:</dt>
+                    <dd>@Model.ServiceType</dd>
+                </dl>
+                
+
+                <form action="/Payment/Charge" method="POST">
+                    <article>
+                        <label>@Model.ServiceName Amount: $@(Convert.ToInt32(Model.ServiceRate))</label>
+                    </article>
+                    @Html.HiddenFor(model => model.Id)
+                    @Html.HiddenFor(model => model.MemberId)
+                    @Html.HiddenFor(model => model.ServiceId)
+                    @Html.HiddenFor(model => model.Amount)
+                    @Html.HiddenFor(model => model.ServiceRate)
+                    @Html.HiddenFor(model => model.ServiceType)
+                    @Html.HiddenFor(model => model.ServiceName)
+                    @Html.HiddenFor(model => model.MemberName)
+
+
+                    <script src="//checkout.stripe.com/v2/checkout.js"
+                            class="stripe-button"
+                            data-key="@publishableKey"
+                            data-locale="auto"
+                            data-description="@Model.ServiceType"
+                            data-amount="@(Convert.ToInt32(Model.ServiceRate)*100)">
+                    </script>
+                    <a href="@Url.Action("Index","Subscriptions")" class="btn btn-sm btn-default">
+                        <i class="glyphicon glyphicon-chevron-left"></i> Cancel
+                    </a>
+                </form>
+
+            </fieldset>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+
+}

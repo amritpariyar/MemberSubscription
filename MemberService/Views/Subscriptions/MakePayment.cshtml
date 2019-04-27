@@ -19,20 +19,27 @@
                     <dt>Service Type:</dt>
                     <dd>@Model.ServiceType</dd>
                 </dl>
-                @using (Html.BeginForm("MakePayment","Subscriptions",FormMethod.Post,new { @Id="PaymentForm"}))
+                @using (Html.BeginForm("MakePayment", "Subscriptions", FormMethod.Post, new { @Id = "PaymentForm" }))
                 {
-                    @Html.HiddenFor(model=>model.Id)
-                    @Html.HiddenFor(model=>model.MemberId)
-                    @Html.HiddenFor(model=>model.ServiceId)
+                    @Html.HiddenFor(model => model.Id)
+                    @Html.HiddenFor(model => model.MemberId)
+                    @Html.HiddenFor(model => model.ServiceId)
                     @Html.AntiForgeryToken()
                     <button type="submit" class="btn btn-sm btn-primary"><i class="glyphicon glyphicon-send"></i> Make Payment</button>
                     <a href="@Url.Action("Index","Subscriptions")" class="btn btn-sm btn-default">
                         <i class="glyphicon glyphicon-chevron-left"></i> Cancel
                     </a>
                 }
-                
+
             </fieldset>
         </div>
     </div>
 </div>
 
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            
+        })
+    </script>
+}

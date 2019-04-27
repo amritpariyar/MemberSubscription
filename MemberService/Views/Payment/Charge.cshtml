@@ -1,0 +1,15 @@
+﻿@model MemberService.Data.BLL.MemberServices
+@{
+    ViewBag.Title = "Charge";
+}
+<div class="container">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <h2>You successfully paid <strong>$ @Model.ServiceRate</strong></h2>
+            <a href="@Url.Action("Index","Subscriptions")" class="btn btn-sm btn-default">
+                        <i class="glyphicon glyphicon-chevron-left"></i> Back To Index
+                    </a>
+        </div>
+    </div>
+</div>
+
